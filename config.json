@@ -1,0 +1,8 @@
+{
+  "client_id": "put your client_id here",
+  "client_secret": "put your client_secret here",
+  "default_status": "put your default bio here (will be displayed while no tracks playing)",
+  "refresh_token": "get a refresh OAuth code from Spotify and put here",
+  "tclient_id": "put your telegram app_id here",
+  "tclient_hash": "put your telegram app hash here"
+}
