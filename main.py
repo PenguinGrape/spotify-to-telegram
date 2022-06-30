@@ -5,9 +5,10 @@ import os
 from time import time, sleep
 from telethon.sync import TelegramClient
 from telethon.tl.functions.account import UpdateProfileRequest
+from telethon.tl.functions.users import GetFullUserRequest
 
 path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
-with open(path + '/config.json', 'r') as fp:
+with open(path + '/config-prod.json', 'r') as fp:
     config = json.load(fp)
 
 client_id = config['client_id']
@@ -16,6 +17,7 @@ default = config['default_status']
 refresh_token = config['refresh_token']
 client = TelegramClient('SpotiToTel', config['tclient_id'], config['tclient_hash'])
 client.start()
+whoami = client.get_me().id
 
 
 class SpotifyTokenError(Exception):
@@ -80,10 +82,14 @@ def main():
             except SpotifyTokenError:
                 api_token = get_token(client_id, client_secret, refresh_token)
                 current_song = get_playing(api_token)
-            client(UpdateProfileRequest(about=current_song))
-            sleep(10)
+            current_about = client(GetFullUserRequest(whoami)).about
+            if current_about != current_song:
+                client(UpdateProfileRequest(about=current_song))
+            sleep(3)
     except KeyboardInterrupt:
-        client(UpdateProfileRequest(about=default))
+        current_about = client(GetFullUserRequest(whoami)).about
+        if current_about != default:
+            client(UpdateProfileRequest(about=default))
         exit(130)
 
 
