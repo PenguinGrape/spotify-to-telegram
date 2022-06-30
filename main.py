@@ -8,7 +8,7 @@ from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.functions.users import GetFullUserRequest
 
 path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
-with open(path + '/config-prod.json', 'r') as fp:
+with open(path + '/config.json', 'r') as fp:
     config = json.load(fp)
 
 client_id = config['client_id']
