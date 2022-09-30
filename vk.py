@@ -2,11 +2,19 @@ import requests
 import base64
 import json
 import os
-from time import time, sleep
-from telethon.sync import TelegramClient
-from telethon.tl.functions.account import UpdateProfileRequest
-from telethon.tl.functions.users import GetFullUserRequest
+from time import time
+import vk_api
 
+
+def auth_handler():
+    key = input("Enter authentication code: ")
+    remember_device = True
+    return key, remember_device
+
+
+vk_session = vk_api.VkApi('login', 'password', auth_handler=auth_handler)
+vk_session.auth()
+vk = vk_session.get_api()
 path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
 with open(path + '/config.json', 'r') as fp:
     config = json.load(fp)
@@ -15,9 +23,6 @@ client_id = config['client_id']
 client_secret = config['client_secret']
 default = config['default_status']
 refresh_token = config['refresh_token']
-client = TelegramClient('SpotiToTel', config['tclient_id'], config['tclient_hash'])
-client.start()
-whoami = client.get_me().id
 
 
 class SpotifyTokenError(Exception):
@@ -72,25 +77,5 @@ def get_playing(api):
         raise Exception(f"Got {r.status_code} while getting current song")
 
 
-def main():
-    api_token = get_token(client_id, client_secret, refresh_token)
-    try:
-        while True:
-            try:
-                current_song = get_playing(api_token)
-            except SpotifyTokenError:
-                api_token = get_token(client_id, client_secret, refresh_token)
-                current_song = get_playing(api_token)
-            current_about = client(GetFullUserRequest(whoami)).about
-            if current_about != current_song:
-                client(UpdateProfileRequest(about=current_song))
-            sleep(3)
-    except KeyboardInterrupt:
-        current_about = client(GetFullUserRequest(whoami)).about
-        if current_about != default:
-            client(UpdateProfileRequest(about=default))
-        exit(130)
-
-
-if __name__ == '__main__':
-    main()
+api = get_token(client_id, client_secret, refresh_token)
+print(get_playing(api))
